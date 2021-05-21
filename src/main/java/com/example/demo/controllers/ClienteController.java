@@ -19,28 +19,29 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.entities.Cliente;
 import com.example.demo.repositories.ClienteRepository;
+import com.example.demo.services.ClienteService;
 
 @RestController
 @RequestMapping("/clientes")
 public class ClienteController {
 
 	@Autowired
-	private ClienteRepository ClienteRepository;
+	private ClienteService clienteService;
 
 	@GetMapping
 	public List<Cliente> getCliente() {
-		return ClienteRepository.findAll();
+		return clienteService.getCliente();
 	}
 
 	@GetMapping("/nome/{nome}")
 	public List<Cliente> getClienteByNome(@PathVariable String nome) {
-		return ClienteRepository.findByNomeContaining(nome);
+		return clienteService.getClienteByNome(nome);
 	}
 
 	@GetMapping("/{id}")
 	public ResponseEntity<Cliente> getClienteById(@PathVariable Long id) {
-		if (ClienteRepository.findById(id).isPresent()) {
-			return ResponseEntity.ok(ClienteRepository.findById(id).get());
+		if (clienteService.getClienteById(id) != null) {
+			return ResponseEntity.ok(clienteService.getClienteById(id));
 		} else {
 			return ResponseEntity.notFound().build();
 		}
@@ -48,28 +49,28 @@ public class ClienteController {
 
 	@PostMapping
 	@ResponseStatus(code = HttpStatus.CREATED)
-	public Cliente seveCliente(@Valid @RequestBody Cliente cliente) {
-		return ClienteRepository.save(cliente);
+	public Cliente saveCliente(@Valid @RequestBody Cliente cliente) {
+		return clienteService.saveCliente(cliente);
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<Cliente> updateCliente(@Valid @PathVariable Long id , @RequestBody Cliente cliente) {
-		if (ClienteRepository.findById(id).isPresent()) {
-			cliente.setId(ClienteRepository.findById(id).get().getId());
-			ClienteRepository.save(cliente);
+	public ResponseEntity<Cliente> updateCliente(@Valid @PathVariable Long id, @RequestBody Cliente cliente) {
+		if (clienteService.getClienteById(id) != null) {
+			cliente.setId(clienteService.getClienteById(id).getId());
+			clienteService.saveCliente(cliente);
 			return ResponseEntity.ok(cliente);
 		} else {
 			return ResponseEntity.notFound().build();
 		}
 	}
-	
+
 	@DeleteMapping("/{id}")
 	@ResponseStatus(code = HttpStatus.PROCESSING)
-	public ResponseEntity<Void> updateCliente(@PathVariable Long id) {
+	public ResponseEntity<Void> deleteCliente(@PathVariable Long id) {
 		Cliente cliente = new Cliente();
-		if (ClienteRepository.findById(id).isPresent()) {
-			cliente.setId(ClienteRepository.findById(id).get().getId());
-			ClienteRepository.delete(cliente);
+		if (clienteService.getClienteById(id) != null) {
+			cliente.setId(clienteService.getClienteById(id).getId());
+			clienteService.deleteCliente(id);
 			return ResponseEntity.ok().build();
 		} else {
 			return ResponseEntity.notFound().build();
